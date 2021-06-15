@@ -16,12 +16,16 @@ import {
     Button
 } from 'react-native';
 
-const licenseKey = Platform.select({
-    // iOS license key for applicationID: com.microblink.sample
-    ios: 'sRwAAAEVY29tLm1pY3JvYmxpbmsuc2FtcGxl1BIcP4FpSuS/38JVOWaLMUMW+4CSRlPH5nVsy5f+xFjYutJX80GcvEyclw+SM7cjBwSazdaGilBWPcwulKICq141a1XBnYLt5nSyhDrP+PNnId8bqFT1ic1A71TubT8iroMgkbLhW7lnjNgPDyuw/2aqsS8U/pkkk8YgekN0IZm5M/0q1CSLtAehIswt5CoFtYcG1DIuGnaTvVNoRGUu7+HaVXAmxGFENiITmrOpLXFSJXFRdyBQHd3rfLgBDzIEPvTIGoGVD0ZUFFziRMkk+om4QIQE8bYHx0L8WFNbkXf5WMw2hlf3cUJmDOI04Xx1FYrTYKlbam6Q+5OsEHXjTIt5',
-    // android license key for applicationID: com.microblink.sample
-    android: 'sRwAAAAVY29tLm1pY3JvYmxpbmsuc2FtcGxlU9kJdZhZkGlTu9U3ORtDZCu0vFoxWJyF0dnv88NTiJO9pmEXPFZB9pVlO146QMSXVLAnYzACtQkatIeij7DU7ncIxLPulqRre/pOorG7HaWypuPGrotFAut0fJMJSckpf7QQC5N/97MV4Mdjk/JA6zeC83V0JqSEIMBisJRSeL4H1BqrcrDqhZpMjddPQQ+e8XVAmL2WxPsTubyqQDFvU6VSGE2nVIxbsXfpKApGRPSD7d+m46zsK6X86hMuMIu9sdtABD0AS0Bzm8HpaJZWkP51L6Ag9Dor9Iqluw0RTm+WgsQzycLBJ80iJwxryFiKOWtiPlvxQPAqn16CDT7J6h/z'
-})
+const blinkIDLicense = Platform.select({
+    ios: {
+        licenseKey: 'sRwAAAEVY29tLm1pY3JvYmxpbmsuc2FtcGxl1BIcP4FpSuS/38JVOWaLMUMW+4CSRlPH5nVsy5f+xFjYutJX80GcvEyclw+SM7cjBwSazdaGilBWPcwulKICq141a1XBnYLt5nSyhDrP+PNnId8bqFT1ic1A71TubT8iroMgkbLhW7lnjNgPDyuw/2aqsS8U/pkkk8YgekN0IZm5M/0q1CSLtAehIswt5CoFtYcG1DIuGnaTvVNoRGUu7+HaVXAmxGFENiITmrOpLXFSJXFRdyBQHd3rfLgBDzIEPvTIGoGVD0ZUFFziRMkk+om4QIQE8bYHx0L8WFNbkXf5WMw2hlf3cUJmDOI04Xx1FYrTYKlbam6Q+5OsEHXjTIt5',
+        showTrialLicenseWarning: false,
+    },
+    android: {
+        licenseKey: 'sRwAAAAVY29tLm1pY3JvYmxpbmsuc2FtcGxlU9kJdZhZkGlTu9U3ORtDZCu0vFoxWJyF0dnv88NTiJO9pmEXPFZB9pVlO146QMSXVLAnYzACtQkatIeij7DU7ncIxLPulqRre/pOorG7HaWypuPGrotFAut0fJMJSckpf7QQC5N/97MV4Mdjk/JA6zeC83V0JqSEIMBisJRSeL4H1BqrcrDqhZpMjddPQQ+e8XVAmL2WxPsTubyqQDFvU6VSGE2nVIxbsXfpKApGRPSD7d+m46zsK6X86hMuMIu9sdtABD0AS0Bzm8HpaJZWkP51L6Ag9Dor9Iqluw0RTm+WgsQzycLBJ80iJwxryFiKOWtiPlvxQPAqn16CDT7J6h/z',
+        showTrialLicenseWarning: false,
+    },
+});
 
 var renderIf = function(condition, content) {
     if (condition) {
@@ -66,25 +70,26 @@ export default class Sample extends Component {
 
     async scan() {
         try {
+            const overlaySettings = new BlinkIDReactNative.BlinkIdOverlaySettings();
+            overlaySettings.useFrontCamera = true;
 
-            // to scan any machine readable travel document (passports, visas and IDs with
-            // machine readable zone), use MrtdRecognizer
-            // var mrtdRecognizer = new BlinkIDReactNative.MrtdRecognizer();
-            // mrtdRecognizer.returnFullDocumentImage = true;
-
-            // var mrtdSuccessFrameGrabber = new BlinkIDReactNative.SuccessFrameGrabberRecognizer(mrtdRecognizer);
-
-            // BlinkIDCombinedRecognizer automatically classifies different document types and scans the data from
-            // the supported document
-            var blinkIdCombinedRecognizer = new BlinkIDReactNative.BlinkIdCombinedRecognizer();
+            const blinkIdCombinedRecognizer = new BlinkIDReactNative.BlinkIdCombinedRecognizer();
             blinkIdCombinedRecognizer.returnFullDocumentImage = true;
             blinkIdCombinedRecognizer.returnFaceImage = true;
 
+            const usdlCombinedRecognizer = new BlinkIDReactNative.UsdlCombinedRecognizer();
+            usdlCombinedRecognizer.returnFullDocumentImage = true;
+            usdlCombinedRecognizer.returnFaceImage = true;
+
             const scanningResults = await BlinkIDReactNative.BlinkID.scanWithCamera(
-                new BlinkIDReactNative.BlinkIdOverlaySettings(),
-                new BlinkIDReactNative.RecognizerCollection([blinkIdCombinedRecognizer/*, mrtdSuccessFrameGrabber*/]),
-                licenseKey
+              overlaySettings,
+              new BlinkIDReactNative.RecognizerCollection([
+                  usdlCombinedRecognizer,
+                  blinkIdCombinedRecognizer,
+              ]),
+              blinkIDLicense,
             );
+            console.log("For some reason its empty array: ", scanningResults);
 
             if (scanningResults) {
                 let newState = {
@@ -126,7 +131,7 @@ export default class Sample extends Component {
         } catch (error) {
             console.log(error);
             this.setState({ showFrontImageDocument: false, resultFrontImageDocument: '', showBackImageDocument: false, resultBackImageDocument: '', showImageFace: false, resultImageFace: '', results: 'Scanning has been cancelled', showSuccessFrame: false,
-            successFrame: ''});
+                successFrame: ''});
         }
     }
 
